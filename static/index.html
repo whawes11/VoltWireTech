@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>VoltWire - Commercial Low-Voltage Field Service Marketplace</title>
+  
+  <!-- PWA & Mobile Meta Tags -->
+  <meta name="theme-color" content="#000000">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <link rel="manifest" href="manifest.json">
+  
+    <!-- Leaflet Interactive Map CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
+  <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <!-- Top Navigation Bar -->
+  <header class="navbar">
+    <div class="nav-container">
+      <div class="brand">
+        <!-- Monochrome Structured Cabling Vector Logo -->
+        <div class="logo-icon-svg" title="VoltWire Structured Cabling & IT">
+          <svg viewBox="0 0 100 100" fill="none">
+            <path d="M 20,20 L 45,45 M 55,55 L 80,80" stroke="#ffffff" stroke-width="4" stroke-linecap="round"/>
+            <path d="M 80,20 L 55,45 M 45,55 L 20,80" stroke="#ffffff" stroke-width="4" stroke-linecap="round"/>
+            <circle cx="20" cy="20" r="3.5" fill="#ffffff"/>
+            <circle cx="80" cy="20" r="3.5" fill="#ffffff"/>
+            <circle cx="20" cy="80" r="3.5" fill="#ffffff"/>
+            <circle cx="80" cy="80" r="3.5" fill="#ffffff"/>
+            <path d="M 15,50 Q 30,42 45,50" stroke="#ffffff" stroke-width="2.5" fill="none"/>
+            <path d="M 55,50 Q 70,58 85,50" stroke="#ffffff" stroke-width="2.5" fill="none"/>
+            <polygon points="52,38 42,52 50,52 46,65 58,48 50,48" fill="#ffffff"/>
+          </svg>
+        </div>
+        <div class="brand-text">
+          <span class="brand-title">VOLTWIRE</span>
+          <span class="brand-subtitle">Cabling • 4K CCTV • Network Devices</span>
+        </div>
+      </div>
+
+      <nav class="nav-links">
+        <button class="nav-btn active" data-tab="jobs-tab">Browse Work Orders</button>
+        <button class="nav-btn" data-tab="client-portal-tab">🏢 For Clients</button>
+        <button class="nav-btn" data-tab="contractor-portal-tab">⚡ For Contractors</button>
+        <button class="nav-btn" data-tab="my-jobs-tab">📋 Dispatch Pipeline</button>
+        <button class="nav-btn" data-tab="contractors-tab">Technicians & Scores</button>
+      </nav>
+
+      <div class="nav-user-area">
+        <button class="header-action-btn client-btn" onclick="switchTab('client-portal-tab')">Client Sign Up</button>
+        <button class="header-action-btn tech-btn" onclick="switchTab('contractor-portal-tab')">Contractor Sign Up</button>
+        
+        <div class="active-user-badge" id="activeUserBadge" onclick="openAuthModal()" title="Click to switch test profiles">
+          <span class="user-role-tag" id="userRoleTag">Business</span>
+          <span class="user-name" id="userNameDisplay">OmniTech Managed IT</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Platform Guarantee Banner -->
+  <div class="fee-banner">
+    <div class="fee-banner-content">
+      <div>
+        <span>🛡️ <strong>VoltWire Field Service Escrow:</strong> 10% standard marketplace fee upon client approval. $1,000,000+ General Liability insurance mandatory for payment release.</span>
+      </div>
+      <div>
+        <span class="platform-take-rate">Platform Fee: <strong>10.0%</strong></span>
+        <span class="pro-banner-chip" onclick="switchTab('contractor-portal-tab')">⚡ Pro Membership: <strong>0-Day Instant Payout (+2%)</strong></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Hero Acquisition Banner -->
+  <section class="hero-banner">
+    <div class="hero-content">
+      <h1>On-Demand Field Service Dispatch for Low-Voltage & Network Techs</h1>
+      <p>The specialized B2B marketplace matching IT Companies, MSPs, and General Contractors with vetted cabling, CCTV, and network infrastructure specialists.</p>
+      
+      <!-- Split Audience Call-To-Action Cards -->
+      <div class="audience-cta-grid">
+        <div class="audience-card" onclick="switchTab('client-portal-tab')">
+          <div class="card-badge">FOR CLIENTS & IT FIRMS</div>
+          <h3>Need Technicians to Contract For You?</h3>
+          <p>Post structured cabling, 4K camera rollouts, and switch cutovers. Get competitive bids from insured local technicians.</p>
+          <button class="cta-card-btn">Post a Job / Sign Up as Client →</button>
+        </div>
+
+        <div class="audience-card" onclick="switchTab('contractor-portal-tab')">
+          <div class="card-badge">FOR INDEPENDENT CONTRACTORS</div>
+          <h3>Looking for Subcontract Work?</h3>
+          <p>Find commercial cabling, CCTV, and IT infrastructure contracts in your area. Keep 90% of earnings with instant payouts.</p>
+          <button class="cta-card-btn">Find Work / Sign Up as Contractor →</button>
+        </div>
+      </div>
+
+      <div class="stats-bar" id="statsBar">
+        <div class="stat-card">
+          <span class="stat-value" id="statOpenJobs">-</span>
+          <span class="stat-label">Active Work Orders</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-value" id="statContractors">-</span>
+          <span class="stat-label">Insured Techs ($1M+)</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-value" id="statTotalBids">-</span>
+          <span class="stat-label">Competitive Bids</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-value" id="statPlatformFees">$480.00</span>
+          <span class="stat-label">10% Platform Earnings</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Main Container -->
+  <main class="main-container">
+
+    <!-- TAB 1: BROWSE WORK ORDERS -->
+    <section id="jobs-tab" class="tab-view active">
+      <div class="view-header">
+        <div>
+          <h2>Available Subcontract Work Orders</h2>
+          <p class="subtitle">Commercial installation contracts open for certified technician bidding.</p>
+        </div>
+        <button class="primary-btn" onclick="switchTab('client-portal-tab')">+ Post a Work Order</button>
+      </div>
+
+      <!-- Filters & Search -->
+      <div class="filter-panel">
+        <div class="search-box">
+          <input type="text" id="jobSearchInput" placeholder="Search by scope, client, or location (e.g. 4K Camera, Cisco Switch, Cat6A, Atlanta)...">
+          <button class="search-btn" id="jobSearchBtn">Search</button>
+        </div>
+
+        <div class="filter-pills" id="categoryPills">
+          <button class="pill active" data-cat="">All Disciplines</button>
+          <button class="pill" data-cat="CCTV & IP Surveillance">📹 CCTV & IP Cameras</button>
+          <button class="pill" data-cat="Network Device Installation">🖧 Network Devices & Racks</button>
+          <button class="pill" data-cat="Structured Cabling">🔌 Structured Cabling</button>
+          <button class="pill" data-cat="Fiber Optics">💡 Fiber Optics</button>
+          <button class="pill" data-cat="Access Control">🔐 Access Control</button>
+        </div>
+      </div>
+
+      <!-- View Mode & Map Controls -->
+      <div class="view-mode-bar">
+        <div class="view-mode-toggles">
+          <button class="mode-btn active" id="btnListView" onclick="setJobViewMode('list')">📋 List View</button>
+          <button class="mode-btn" id="btnMapView" onclick="setJobViewMode('map')">🗺️ Georgia Dispatch Radar Map</button>
+          <button class="mode-btn" id="btnSplitView" onclick="setJobViewMode('split')">⊞ Split View</button>
+        </div>
+        <div class="map-status-pill">
+          <span class="live-dot"></span> <span id="mapPinCount">7</span> Active Dispatch Sites in Georgia
+        </div>
+      </div>
+
+      <!-- Interactive Dispatch Map Container -->
+      <div class="dispatch-map-wrapper" id="dispatchMapWrapper" style="display: none;">
+        <div class="map-legend-bar">
+          <div class="legend-item"><span class="legend-marker">📹</span> CCTV & IP Surveillance</div>
+          <div class="legend-item"><span class="legend-marker">🖧</span> Network Devices & Racks</div>
+          <div class="legend-item"><span class="legend-marker">🔌</span> Structured Cabling</div>
+          <div class="legend-item"><span class="legend-marker">💡</span> Fiber Optics</div>
+          <div class="legend-item"><span class="legend-marker">🔐</span> Access Control</div>
+        </div>
+        <div id="dispatchMap" class="dispatch-map"></div>
+      </div>
+
+      <!-- Jobs Grid -->
+      <div class="jobs-grid" id="jobsGrid">
+        <div class="loading-state">Loading active work orders...</div>
+      </div>
+    </section>
+
+    <!-- TAB 2: FOR CLIENTS (DEDICATED SECTION & SIGNUP) -->
+    <section id="client-portal-tab" class="tab-view">
+      <div class="portal-header">
+        <div class="portal-tag">CLIENT PORTAL</div>
+        <h2>For Companies & Businesses Providing Work Opportunities</h2>
+        <p class="subtitle">Hire licensed, background-checked low-voltage cabling, CCTV, and network infrastructure contractors on-demand.</p>
+      </div>
+
+      <!-- Client Value Proposition Highlights -->
+      <div class="benefits-grid">
+        <div class="benefit-card">
+          <div class="benefit-icon">🛡️</div>
+          <h4>$1M+ Insurance Verified</h4>
+          <p>Every technician must have an active Certificate of Insurance on file before payment release. Zero liability risk for your business.</p>
+        </div>
+        <div class="benefit-card">
+          <div class="benefit-icon">⏰</div>
+          <h4>100% On-Time Guarantee</h4>
+          <p>Our scoring algorithm tracks punctual arrivals and verified check-ins. Review real performance data before awarding contracts.</p>
+        </div>
+        <div class="benefit-card">
+          <div class="benefit-icon">💰</div>
+          <h4>Milestone Escrow Payouts</h4>
+          <p>You review Fluke test reports and deliverables before approving funds. Standard 10% platform take-rate is automatically handled.</p>
+        </div>
+      </div>
+
+      <!-- Dedicated Client Sign-Up & Job Posting Forms -->
+      <div class="dual-form-container">
+        <!-- Client Sign Up -->
+        <div class="form-container">
+          <h3 style="margin-bottom: 0.5rem; color: #ffffff;">Create Client Hiring Account</h3>
+          <p style="color: #a1a1aa; font-size: 0.85rem; margin-bottom: 1.5rem;">For MSPs, IT consultants, general contractors, and corporate facilities.</p>
+          
+          <form id="clientSignUpForm" class="styled-form">
+            <div class="form-row">
+              <div class="form-group flex-1">
+                <label>Company / Business Name *</label>
+                <input type="text" id="cliCompany" required placeholder="e.g. Apex Managed Networks LLC">
+              </div>
+              <div class="form-group flex-1">
+                <label>Website URL</label>
+                <input type="url" id="cliWebsite" placeholder="https://apexnetworks.com">
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group flex-1">
+                <label>Primary Contact Name & Title *</label>
+                <input type="text" id="cliContact" required placeholder="e.g. Marcus Vance, Director of IT">
+              </div>
+              <div class="form-group flex-1">
+                <label>Work Email Address *</label>
+                <input type="email" id="cliEmail" required placeholder="dispatch@apexnetworks.com">
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group flex-1">
+                <label>Phone Number *</label>
+                <input type="tel" id="cliPhone" required placeholder="(404) 555-0199">
+              </div>
+              <div class="form-group flex-1">
+                <label>Industry Classification *</label>
+                <select id="cliIndustry" required>
+                  <option value="Managed Service Provider (MSP)">Managed Service Provider (MSP)</option>
+                  <option value="Telecom & ISP">Telecom & ISP</option>
+                  <option value="General Commercial Contractor">General Commercial Contractor</option>
+                  <option value="Healthcare & Life Sciences">Healthcare & Life Sciences</option>
+                  <option value="Retail & Multi-Site Enterprise">Retail & Multi-Site Enterprise</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group flex-1">
+                <label>Corporate Billing Preference *</label>
+                <select id="cliBilling" required>
+                  <option value="corporate_card">Corporate Credit Card (Instant Funding)</option>
+                  <option value="ach_billing">Bank ACH Corporate Auto-Pay</option>
+                  <option value="net_30">Net-30 Invoicing (Verified Corporate Credit)</option>
+                </select>
+              </div>
+              <div class="form-group flex-1">
+                <label>Estimated Monthly Work Orders</label>
+                <select id="cliVolume">
+                  <option value="1-5 jobs">1 - 5 Work Orders / Month</option>
+                  <option value="5-20 jobs" selected>5 - 20 Work Orders / Month</option>
+                  <option value="20-50 jobs">20 - 50 Work Orders / Month</option>
+                  <option value="50+ jobs">50+ Enterprise Work Orders</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group flex-1">
+                <label>Headquarters City, State *</label>
+                <input type="text" id="cliLocation" required placeholder="Atlanta, GA">
+              </div>
+              <div class="form-group flex-1">
+                <label>Account Password *</label>
+                <input type="password" id="cliPassword" required placeholder="••••••••">
+              </div>
+            </div>
+
+            <div class="form-actions">
+              <button type="submit" class="primary-btn submit-large">Create Client Account</button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Or Post a Direct Work Order -->
+        <div class="form-container">
+          <h3 style="margin-bottom: 0.5rem; color: #ffffff;">Publish New Work Order</h3>
+          <p style="color: #a1a1aa; font-size: 0.85rem; margin-bottom: 1.5rem;">Broadcast a project scope directly to local certified contractors.</p>
+
+          <form id="createJobForm" class="styled-form">
+            <div class="form-group">
+              <label for="jobTitle">Work Order Title *</label>
+              <input type="text" id="jobTitle" required placeholder="e.g. 48-Drop Cat6A Cabling & 24-Port Patch Panel Upgrade">
+            </div>
+
+            <div class="form-row">
+              <div class="form-group flex-1">
+                <label for="jobCategory">Discipline *</label>
+                <select id="jobCategory" required>
+                  <option value="Structured Cabling">Structured Cabling (Cat6/Cat6A)</option>
+                  <option value="CCTV & IP Surveillance">CCTV & IP Surveillance</option>
+                  <option value="Network Device Installation">Network Devices & Racks</option>
+                  <option value="Fiber Optics">Fiber Optics</option>
+                  <option value="Access Control">Access Control</option>
+                </select>
+              </div>
+              <div class="form-group flex-1">
+                <label for="jobDropCount">Device / Drop Count</label>
+                <input type="number" id="jobDropCount" min="0" placeholder="e.g. 48">
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group flex-1">
+                <label for="jobCompany">Hiring Company *</label>
+                <input type="text" id="jobCompany" required placeholder="e.g. OmniTech Managed IT">
+              </div>
+              <div class="form-group flex-1">
+                <label for="jobLocation">Site Location (City, State) *</label>
+                <input type="text" id="jobLocation" required placeholder="e.g. Atlanta, GA">
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group flex-1">
+                <label for="budgetMin">Target Budget Min ($) *</label>
+                <input type="number" id="budgetMin" required min="100" step="50" placeholder="e.g. 5000">
+              </div>
+              <div class="form-group flex-1">
+                <label for="budgetMax">Target Budget Max ($) *</label>
+                <input type="number" id="budgetMax" required min="100" step="50" placeholder="e.g. 7500">
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="jobDescription">Scope of Work (SOW) & Requirements *</label>
+              <textarea id="jobDescription" rows="4" required placeholder="Detail ceiling heights, lift requirements, hardware models, and testing criteria..."></textarea>
+            </div>
+
+            <div class="form-group">
+              <label for="jobRequirements">Insurance & Accreditation Requirements</label>
+              <input type="text" id="jobRequirements" value="General Liability Insurance ($1,000,000+ policy mandatory), OSHA 10, State Low Voltage License">
+            </div>
+
+            <div class="fee-notice-box">
+              💡 <strong>10% Platform Take-Rate:</strong> VoltWire automatically retains 10% upon work order approval.
+            </div>
+
+            <div class="form-actions">
+              <button type="submit" class="primary-btn submit-large">Publish Work Order to Marketplace</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 3: FOR CONTRACTORS (DEDICATED SECTION & COMPLIANCE ONBOARDING) -->
+    <section id="contractor-portal-tab" class="tab-view">
+      <div class="portal-header">
+        <div class="portal-tag">CONTRACTOR PORTAL</div>
+        <h2>For Independent Technicians & Installation Crews</h2>
+        <p class="subtitle">Access commercial cabling, 4K CCTV, and network hardware contracts across Georgia. Keep 90% of your earnings.</p>
+      </div>
+
+      <!-- Contractor Value Proposition Highlights -->
+      <div class="benefits-grid">
+        <div class="benefit-card">
+          <div class="benefit-icon">💵</div>
+          <h4>Guaranteed Payouts</h4>
+          <p>Client funds are escrowed in advance. When work is approved, get paid via Bank ACH or Instant Debit Pay.</p>
+        </div>
+        <div class="benefit-card">
+          <div class="benefit-icon">⚡</div>
+          <h4>Pro 0-Day Processing</h4>
+          <p>Enroll in VoltWire Pro (+2% fee) to bypass standard bank clearance and get instant payment immediately upon client sign-off.</p>
+        </div>
+        <div class="benefit-card">
+          <div class="benefit-icon">⭐</div>
+          <h4>Verified Score & Reputation</h4>
+          <p>Build your on-time arrival rate and quality score to win higher-paying enterprise contracts from leading IT providers.</p>
+        </div>
+      </div>
+
+      <!-- Dedicated Contractor Sign-Up & Onboarding Form -->
+      <div class="form-container" style="max-width: 960px;">
+        <h3 style="margin-bottom: 0.5rem; color: #ffffff;">Contractor Onboarding & Compliance Application</h3>
+        <p style="color: #a1a1aa; font-size: 0.85rem; margin-bottom: 1.5rem;">
+          Under federal guidelines and platform policy, all contractors must submit legal entity details, W-9 tax information, payout routing, and proof of General Liability insurance ($1M+ minimum).
+        </p>
+
+        <form id="contractorSignUpForm" class="styled-form">
+          <!-- Step 1: Business Identity & W-9 -->
+          <h4 style="color: #ffffff; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; margin: 1rem 0;">1. Legal Business Structure & Tax Info (W-9)</h4>
+          <div class="form-row">
+            <div class="form-group flex-1">
+              <label>Company / Business Name *</label>
+              <input type="text" id="conName" required placeholder="e.g. Apex Cabling & Fiber Solutions LLC">
+            </div>
+            <div class="form-group flex-1">
+              <label>Lead Technician / Owner Name *</label>
+              <input type="text" id="conContact" required placeholder="e.g. Marcus Reynolds">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group flex-1">
+              <label>Email Address *</label>
+              <input type="email" id="conEmail" required placeholder="marcus@apexcabling.com">
+            </div>
+            <div class="form-group flex-1">
+              <label>Mobile / Dispatch Phone *</label>
+              <input type="tel" id="conPhone" required placeholder="(404) 555-0142">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group flex-1">
+              <label>Legal Entity Type *</label>
+              <select id="conEntity" required>
+                <option value="LLC">Limited Liability Company (LLC)</option>
+                <option value="Sole Proprietorship">Sole Proprietorship / Independent</option>
+                <option value="S-Corporation">S-Corporation</option>
+                <option value="C-Corporation">C-Corporation</option>
+              </select>
+            </div>
+            <div class="form-group flex-1">
+              <label>Tax ID Type *</label>
+              <select id="conTaxType" required>
+                <option value="EIN">Federal EIN (Employer ID Number)</option>
+                <option value="SSN">SSN (Social Security Number)</option>
+              </select>
+            </div>
+            <div class="form-group flex-1">
+              <label>Federal Tax ID (EIN / SSN) *</label>
+              <input type="text" id="conTaxId" required placeholder="XX-XXXXXXX" value="58-9924192">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group flex-1">
+              <label>State Low Voltage License #</label>
+              <input type="text" id="conLicense" placeholder="GA-LVU-009841" value="GA-LVU-009841">
+            </div>
+            <div class="form-group flex-1">
+              <label>Standard Hourly Billing Rate ($/hr)</label>
+              <input type="number" id="conRate" value="75.00" min="25" step="5">
+            </div>
+          </div>
+
+          <!-- Step 2: General Liability Insurance (MANDATORY) -->
+          <h4 style="color: #ffffff; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; margin: 1.5rem 0 1rem 0;">2. General Liability Insurance Policy (Mandatory for Payouts)</h4>
+          <div class="form-row">
+            <div class="form-group flex-1">
+              <label>Insurance Carrier *</label>
+              <input type="text" id="conInsCarrier" required placeholder="e.g. Travelers, Hartford, Hiscox" value="Travelers Commercial">
+            </div>
+            <div class="form-group flex-1">
+              <label>Commercial Policy Number *</label>
+              <input type="text" id="conInsPolicy" required placeholder="e.g. GL-992384-GA" value="GL-992384-GA">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group flex-1">
+              <label>Per Occurrence Coverage Limit *</label>
+              <select id="conInsAmount" required>
+                <option value="1000000" selected>$1,000,000 per Occurrence (Minimum Required)</option>
+                <option value="2000000">$2,000,000 Aggregate Coverage</option>
+                <option value="5000000">$5,000,000 Umbrella Policy</option>
+              </select>
+            </div>
+            <div class="form-group flex-1">
+              <label>Policy Expiration Date *</label>
+              <input type="date" id="conInsExp" required value="2027-10-31">
+            </div>
+          </div>
+
+          <!-- Step 3: Banking & Payout Method -->
+          <h4 style="color: #ffffff; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; margin: 1.5rem 0 1rem 0;">3. Payout Method & Banking Details</h4>
+          <div class="form-row">
+            <div class="form-group flex-1">
+              <label>Preferred Disbursal Method *</label>
+              <select id="conPayoutMethod" required onchange="toggleContractorPayoutFields()">
+                <option value="ach">Standard Bank ACH Direct Deposit (Free, 3-5 Business Days)</option>
+                <option value="debit">Instant Direct Pay to Debit Card (1.5% Expedited Processing Fee)</option>
+              </select>
+            </div>
+            <div class="form-group flex-1">
+              <label>Bank Name</label>
+              <input type="text" id="conBankName" value="Chase Commercial Bank">
+            </div>
+          </div>
+
+          <div class="form-row" id="conAchFields">
+            <div class="form-group flex-1">
+              <label>Bank Routing Number</label>
+              <input type="text" id="conRouting" value="061000104">
+            </div>
+            <div class="form-group flex-1">
+              <label>Bank Account Number</label>
+              <input type="text" id="conAccount" value="982348832">
+            </div>
+          </div>
+
+          <div class="form-group" id="conDebitFields" style="display: none;">
+            <label>Debit Card Number for Instant Pay</label>
+            <input type="text" id="conDebit" placeholder="•••• •••• •••• 4192" value="4532889912344192">
+          </div>
+
+          <!-- Step 4: Pro Membership -->
+          <div class="pro-card-highlight" style="margin-top: 1.25rem;">
+            <label style="display: flex; align-items: center; gap: 0.75rem; cursor: pointer;">
+              <input type="checkbox" id="conProMember" style="width: 20px; height: 20px;" checked>
+              <div>
+                <strong style="color: #ffffff;">Enroll in VoltWire Pro Membership (+2% Fee)</strong>
+                <p style="font-size: 0.8rem; color: #a1a1aa;">Enjoy <strong>0-Day Instant Processing</strong> as soon as client approves deliverables, priority job alerts, and top-tier ranking.</p>
+              </div>
+            </label>
+          </div>
+
+          <div class="form-row" style="margin-top: 1rem;">
+            <div class="form-group flex-1">
+              <label>Password *</label>
+              <input type="password" id="conPassword" required placeholder="••••••••">
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" class="primary-btn submit-large">Complete Contractor Registration & Verification</button>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <!-- TAB 4: DISPATCH WORK ORDERS (MY JOBS & NEGOTIATION) -->
+    <section id="my-jobs-tab" class="tab-view">
+      <div class="view-header">
+        <div>
+          <h2>Field Dispatch & Negotiation Pipeline</h2>
+          <p class="subtitle">Track proposals, client counter-offers, on-site check-ins, and escrow payouts.</p>
+        </div>
+      </div>
+
+      <div class="my-jobs-container" id="myJobsContainer">
+        <div class="loading-state">Loading your work order pipeline...</div>
+      </div>
+    </section>
+
+    <!-- TAB 5: CONTRACTORS & PERFORMANCE SCORES -->
+    <section id="contractors-tab" class="tab-view">
+      <div class="view-header">
+        <div>
+          <h2>Technician Directory & Reliability Scores</h2>
+          <p class="subtitle">Vetted on General Liability Insurance ($1M+), On-Time Arrival %, and Client Reviews.</p>
+        </div>
+        <button class="primary-btn" onclick="switchTab('contractor-portal-tab')">+ Join as Contractor</button>
+      </div>
+
+      <div class="contractors-grid" id="contractorsGrid">
+        <div class="loading-state">Loading scored technicians...</div>
+      </div>
+    </section>
+
+
+  </main>
+
+  <!-- MODAL: CLIENT COUNTER-OFFER -->
+  <div class="modal-backdrop" id="counterModal">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3>Propose Counter-Offer to Contractor</h3>
+        <button class="close-btn" onclick="closeModal('counterModal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="counterOfferForm">
+          <input type="hidden" id="counterJobId">
+          <input type="hidden" id="counterBidId">
+
+          <div class="target-job-summary" id="counterSummary"></div>
+
+          <div class="form-group">
+            <label>Proposed Counter-Offer Amount ($) *</label>
+            <input type="number" id="counterAmount" required min="100" step="50" placeholder="e.g. 7200">
+          </div>
+
+          <div class="form-group">
+            <label>Message / Scope Terms for Contractor</label>
+            <textarea id="counterNotes" rows="3" placeholder="e.g. We can approve $7,200 if you provide scissor lift and complete termination by Friday..."></textarea>
+          </div>
+
+          <div class="modal-actions">
+            <button type="submit" class="primary-btn btn-counter">Send Counter-Offer</button>
+            <button type="button" class="secondary-btn" onclick="closeModal('counterModal')">Cancel</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: AUTH / SWITCH PROFILE -->
+  <div class="modal-backdrop" id="authModal">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3>User Profiles & Roles</h3>
+        <button class="close-btn" onclick="closeModal('authModal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="account-selector-box">
+          <h4>Switch Active Profile</h4>
+          <div class="demo-user-list">
+            <button class="user-chip" onclick="loginAs(1, 'OmniTech Managed IT', 'business', 'dispatch@omnitech.com')">
+              🏢 OmniTech Managed IT (Business Client)
+            </button>
+            <button class="user-chip" onclick="loginAs(2, 'Apex Logistics Facilities', 'business', 'facilities@apexlogistics.com')">
+              🏢 Apex Logistics (Business Client)
+            </button>
+            <button class="user-chip" onclick="loginAs(3, 'Precision Low Voltage', 'contractor', 'marcus@precisionlowvoltage.com')">
+              ⚡ Marcus Reynolds (Pro Contractor - 100% On-Time, $2M Insured)
+            </button>
+            <button class="user-chip" onclick="loginAs(4, 'Apex Shield Security', 'contractor', 'elena@apexshieldsec.com')">
+              ⚡ Elena Vasquez (Contractor - CCTV & Access, $1M Insured)
+            </button>
+          </div>
+        </div>
+
+        <div style="margin-top: 1.5rem; display: flex; gap: 0.75rem;">
+          <button class="primary-btn" onclick="closeModal('authModal'); switchTab('client-portal-tab');">Sign Up as Client</button>
+          <button class="secondary-btn" onclick="closeModal('authModal'); switchTab('contractor-portal-tab');">Sign Up as Contractor</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: JOB DETAIL & BIDS -->
+  <div class="modal-backdrop" id="jobDetailModal">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 id="modalJobTitle">Work Order Details</h3>
+        <button class="close-btn" onclick="closeModal('jobDetailModal')">&times;</button>
+      </div>
+      <div class="modal-body" id="modalJobBody"></div>
+    </div>
+  </div>
+
+  <!-- MODAL: SUBMIT BID -->
+  <div class="modal-backdrop" id="submitBidModal">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3>Submit Contractor Bid</h3>
+        <button class="close-btn" onclick="closeModal('submitBidModal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="submitBidForm">
+          <input type="hidden" id="bidJobId">
+          
+          <div class="target-job-summary" id="bidJobHeader"></div>
+
+          <div class="form-row">
+            <div class="form-group flex-1">
+              <label for="bidAmount">Total Proposal Price ($) *</label>
+              <input type="number" id="bidAmount" required min="1" step="50" placeholder="e.g. 6800" oninput="calculateBidFeeBreakdown()">
+            </div>
+            <div class="form-group flex-1">
+              <label for="bidEstimatedDays">Estimated Work Days</label>
+              <input type="number" id="bidEstimatedDays" min="1" value="3">
+            </div>
+          </div>
+
+          <div class="fee-card-highlight">
+            <div class="fee-row">
+              <span>VoltWire 10% Platform Fee:</span>
+              <strong id="modalBidFee">$0.00</strong>
+            </div>
+            <div class="fee-row payout">
+              <span>Net Contractor Take-Home:</span>
+              <strong id="modalBidPayout">$0.00</strong>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group flex-1">
+              <label for="bidLaborCost">Estimated Labor ($)</label>
+              <input type="number" id="bidLaborCost" min="0" step="50" placeholder="e.g. 4200">
+            </div>
+            <div class="form-group flex-1">
+              <label for="bidMaterialCost">Estimated Materials ($)</label>
+              <input type="number" id="bidMaterialCost" min="0" step="50" placeholder="e.g. 2600">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="bidProposalNotes">Proposal & Scope Details *</label>
+            <textarea id="bidProposalNotes" rows="4" required placeholder="Detail your crew size, availability, camera/hardware brands, warranty, and Fluke test reports included..."></textarea>
+          </div>
+
+          <div class="modal-actions">
+            <button type="submit" class="primary-btn">Submit Official Bid</button>
+            <button type="button" class="secondary-btn" onclick="closeModal('submitBidModal')">Cancel</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: REVIEW & SCORE CONTRACTOR -->
+  <div class="modal-backdrop" id="reviewModal">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3>Rate & Score Technician</h3>
+        <button class="close-btn" onclick="closeModal('reviewModal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="reviewForm">
+          <input type="hidden" id="revJobId">
+          <input type="hidden" id="revContractorId">
+
+          <div class="form-group">
+            <label>Did the technician arrive on-site on time? *</label>
+            <select id="revOnTime" required>
+              <option value="1">✓ Yes - Arrived exactly on schedule</option>
+              <option value="0">✗ No - Arrived late</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Overall Quality & Workmanship Rating *</label>
+            <select id="revRating" required>
+              <option value="5.0">⭐⭐⭐⭐⭐ 5.0 - Flawless installation & clean cleanup</option>
+              <option value="4.0">⭐⭐⭐⭐ 4.0 - Good quality, minor adjustments needed</option>
+              <option value="3.0">⭐⭐⭐ 3.0 - Acceptable</option>
+              <option value="2.0">⭐⭐ 2.0 - Poor cable dressing or testing issues</option>
+              <option value="1.0">⭐ 1.0 - Unacceptable</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Feedback & Performance Review</label>
+            <textarea id="revText" rows="3" placeholder="Describe the technician's professionalism, cabling cleanliness, and Fluke test delivery..."></textarea>
+          </div>
+
+          <div class="modal-actions">
+            <button type="submit" class="primary-btn">Submit Rating & Update Score</button>
+            <button type="button" class="secondary-btn" onclick="closeModal('reviewModal')">Cancel</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+    <!-- Leaflet Interactive Map JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+  <script src="app.js"></script>
+</body>
+</html>

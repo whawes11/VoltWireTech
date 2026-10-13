@@ -1,0 +1,16 @@
+{
+  "appId": "com.voltwire.fieldservice",
+  "appName": "VoltWire",
+  "webDir": "static",
+  "bundledWebRuntime": false,
+  "server": {
+    "url": "https://voltwiretech.com",
+    "cleartext": false
+  },
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 1500,
+      "backgroundColor": "#000000"
+    }
+  }
+}

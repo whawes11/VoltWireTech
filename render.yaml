@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: voltwire-marketplace
+    env: python
+    plan: free
+    buildCommand: ""
+    startCommand: python3 server.py
+    envVars:
+      - key: PORT
+        value: 8080

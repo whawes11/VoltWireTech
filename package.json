@@ -1,0 +1,48 @@
+{
+  "name": "voltwire-fieldservice",
+  "version": "1.0.0",
+  "description": "VoltWire - Field Service Marketplace for Low-Voltage Cabling, CCTV, and Network Infrastructure",
+  "main": "electron-main.js",
+  "scripts": {
+    "start": "python3 server.py",
+    "desktop": "electron .",
+    "desktop:build": "electron-builder --mac",
+    "desktop:build:win": "electron-builder --win",
+    "mobile:prepare": "npx cap sync",
+    "mobile:ios": "npx cap sync ios && npx cap open ios",
+    "mobile:android": "npx cap sync android && npx cap open android",
+    "build:all": "bash scripts/build_all_platforms.sh"
+  },
+  "build": {
+    "appId": "com.voltwire.fieldservice",
+    "productName": "VoltWire",
+    "electronVersion": "29.4.6",
+    "mac": {
+      "category": "public.app-category.business",
+      "target": [
+        "dmg",
+        "zip"
+      ]
+    },
+    "win": {
+      "target": [
+        "nsis"
+      ]
+    },
+    "directories": {
+      "output": "dist"
+    }
+  },
+  "dependencies": {
+    "@capacitor/android": "^6.0.0",
+    "@capacitor/cli": "^6.0.0",
+    "@capacitor/core": "^6.0.0",
+    "@capacitor/ios": "^6.0.0"
+  },
+  "devDependencies": {
+    "electron": "29.4.6",
+    "electron-builder": "^24.13.3"
+  },
+  "author": "VoltWire Inc.",
+  "license": "Proprietary"
+}
