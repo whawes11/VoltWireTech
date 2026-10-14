@@ -52,14 +52,10 @@
         <button class="nav-btn" data-tab="contractors-tab">Technicians & Scores</button>
       </nav>
 
-      <div class="nav-user-area">
+      <div class="nav-user-area" id="navUserArea">
         <button class="header-action-btn client-btn" onclick="switchTab('client-portal-tab')">Client Sign Up</button>
         <button class="header-action-btn tech-btn" onclick="switchTab('contractor-portal-tab')">Contractor Sign Up</button>
-        
-        <div class="active-user-badge" id="activeUserBadge" onclick="openAuthModal()" title="Click to switch test profiles">
-          <span class="user-role-tag" id="userRoleTag">Business</span>
-          <span class="user-name" id="userNameDisplay">OmniTech Managed IT</span>
-        </div>
+        <button class="header-action-btn" onclick="openAuthModal()" style="background:#ffffff; color:#000000; font-weight:700;">Sign In</button>
       </div>
     </div>
   </header>
@@ -114,7 +110,7 @@
           <span class="stat-label">Competitive Bids</span>
         </div>
         <div class="stat-card">
-          <span class="stat-value" id="statPlatformFees">$480.00</span>
+          <span class="stat-value" id="statPlatformFees">$0.00</span>
           <span class="stat-label">10% Platform Earnings</span>
         </div>
       </div>
@@ -607,35 +603,34 @@
     </div>
   </div>
 
-  <!-- MODAL: AUTH / SWITCH PROFILE -->
+  <!-- MODAL: USER SIGN IN -->
   <div class="modal-backdrop" id="authModal">
     <div class="modal-dialog">
       <div class="modal-header">
-        <h3>User Profiles & Roles</h3>
+        <h3>Sign In to VoltWire</h3>
         <button class="close-btn" onclick="closeModal('authModal')">&times;</button>
       </div>
       <div class="modal-body">
-        <div class="account-selector-box">
-          <h4>Switch Active Profile</h4>
-          <div class="demo-user-list">
-            <button class="user-chip" onclick="loginAs(1, 'OmniTech Managed IT', 'business', 'dispatch@omnitech.com')">
-              🏢 OmniTech Managed IT (Business Client)
-            </button>
-            <button class="user-chip" onclick="loginAs(2, 'Apex Logistics Facilities', 'business', 'facilities@apexlogistics.com')">
-              🏢 Apex Logistics (Business Client)
-            </button>
-            <button class="user-chip" onclick="loginAs(3, 'Precision Low Voltage', 'contractor', 'marcus@precisionlowvoltage.com')">
-              ⚡ Marcus Reynolds (Pro Contractor - 100% On-Time, $2M Insured)
-            </button>
-            <button class="user-chip" onclick="loginAs(4, 'Apex Shield Security', 'contractor', 'elena@apexshieldsec.com')">
-              ⚡ Elena Vasquez (Contractor - CCTV & Access, $1M Insured)
-            </button>
+        <form id="loginForm" class="styled-form">
+          <div class="form-group">
+            <label>Email or Username *</label>
+            <input type="text" id="loginUsername" required placeholder="e.g. dispatch@yourcompany.com">
           </div>
-        </div>
+          <div class="form-group">
+            <label>Password *</label>
+            <input type="password" id="loginPassword" required placeholder="••••••••">
+          </div>
+          <div class="form-actions" style="margin-top: 1.25rem;">
+            <button type="submit" class="primary-btn submit-large" style="width: 100%;">Sign In</button>
+          </div>
+        </form>
 
-        <div style="margin-top: 1.5rem; display: flex; gap: 0.75rem;">
-          <button class="primary-btn" onclick="closeModal('authModal'); switchTab('client-portal-tab');">Sign Up as Client</button>
-          <button class="secondary-btn" onclick="closeModal('authModal'); switchTab('contractor-portal-tab');">Sign Up as Contractor</button>
+        <div style="margin-top: 1.5rem; padding-top: 1.25rem; border-top: 1px solid var(--border); text-align: center;">
+          <p style="color: #a1a1aa; font-size: 0.85rem; margin-bottom: 1rem;">Don't have an account yet?</p>
+          <div style="display: flex; gap: 0.75rem;">
+            <button class="secondary-btn" style="flex: 1;" onclick="closeModal('authModal'); switchTab('client-portal-tab');">🏢 Sign Up as Client</button>
+            <button class="secondary-btn" style="flex: 1;" onclick="closeModal('authModal'); switchTab('contractor-portal-tab');">⚡ Sign Up as Contractor</button>
+          </div>
         </div>
       </div>
     </div>

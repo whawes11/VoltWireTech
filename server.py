@@ -200,23 +200,8 @@ def init_db():
     )
     """)
 
-    # Ensure clients table is populated if users exist
-    cursor.execute("SELECT COUNT(*) as count FROM clients")
-    if cursor.fetchone()["count"] == 0:
-        seed_clients_data(cursor)
-
     conn.commit()
     conn.close()
-
-def seed_clients_data(cursor):
-    clients = [
-        (1, "OmniTech Managed IT Services", "Sarah Jenkins", "dispatch@omnitech.com", "(404) 555-8100", "https://omnitech-it.com", "Managed Service Provider (MSP)", "1000 Peachtree St NE, Atlanta, GA 30309", "ach_billing", "20-50 jobs", 1),
-        (2, "Apex Logistics Facilities", "Robert Vance", "facilities@apexlogistics.com", "(912) 555-4300", "https://apexlogistics.com", "Commercial Enterprise & Warehousing", "500 River St, Savannah, GA 31401", "corporate_card", "5-20 jobs", 1)
-    ]
-    cursor.executemany("""
-    INSERT INTO clients (user_id, company_name, contact_name, email, phone, website, industry_type, billing_address, billing_method, monthly_volume, verified)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    """, clients)
 
 class MarketplaceHandler(BaseHTTPRequestHandler):
     def end_headers(self):

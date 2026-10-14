@@ -1,11 +1,14 @@
 // VoltWire Client Application - Enterprise Field Service & Subcontracting Engine
 
-let currentUser = {
-  id: 1,
-  name: "OmniTech Managed IT",
-  role: "business",
-  email: "dispatch@omnitech.com"
-};
+let currentUser = null;
+try {
+  const saved = localStorage.getItem("voltwire_user");
+  if (saved) {
+    currentUser = JSON.parse(saved);
+  }
+} catch (e) {
+  currentUser = null;
+}
 
 let currentJobs = [];
 let currentCategory = "";
@@ -24,25 +27,34 @@ document.addEventListener("DOMContentLoaded", () => {
 
 // User State & Auth
 function updateUserUI() {
-  const roleTag = document.getElementById("userRoleTag");
-  const nameDisplay = document.getElementById("userNameDisplay");
+  const userArea = document.getElementById("navUserArea");
+  if (!userArea) return;
 
-  roleTag.textContent = currentUser.role.toUpperCase();
-  roleTag.style.background = currentUser.role === "business" ? "#ffffff" : "#27272a";
-  roleTag.style.color = currentUser.role === "business" ? "#000000" : "#ffffff";
-  nameDisplay.textContent = currentUser.name;
+  if (currentUser) {
+    userArea.innerHTML = `
+      <div class="active-user-badge">
+        <span class="user-role-tag" style="background:${currentUser.role === "business" ? "#ffffff" : "#27272a"}; color:${currentUser.role === "business" ? "#000000" : "#ffffff"};">${currentUser.role.toUpperCase()}</span>
+        <span class="user-name">${escapeHtml(currentUser.name)}</span>
+      </div>
+      <button class="header-action-btn" onclick="logout()" style="background:transparent; border:1px solid #3f3f46; color:#a1a1aa; cursor:pointer;">Sign Out</button>
+    `;
+  } else {
+    userArea.innerHTML = `
+      <button class="header-action-btn client-btn" onclick="switchTab('client-portal-tab')">Client Sign Up</button>
+      <button class="header-action-btn tech-btn" onclick="switchTab('contractor-portal-tab')">Contractor Sign Up</button>
+      <button class="header-action-btn" onclick="openAuthModal()" style="background:#ffffff; color:#000000; font-weight:700; cursor:pointer;">Sign In</button>
+    `;
+  }
 }
 
 function openAuthModal() {
   openModal("authModal");
 }
 
-function loginAs(id, name, role, email) {
-  currentUser = { id, name, role, email };
+function logout() {
+  currentUser = null;
+  localStorage.removeItem("voltwire_user");
   updateUserUI();
-  initDispatchMap();
-  closeModal("authModal");
-  alert(`Active profile switched to: ${name} (${role.toUpperCase()})`);
   loadDashboardData();
 }
 
@@ -121,10 +133,10 @@ async function loadStats() {
     const res = await fetch("/api/stats");
     const stats = await res.json();
 
-    document.getElementById("statOpenJobs").textContent = stats.open_jobs;
-    document.getElementById("statContractors").textContent = stats.contractors_count;
-    document.getElementById("statTotalBids").textContent = stats.total_bids;
-    document.getElementById("statPlatformFees").textContent = `$${stats.platform_earnings.toFixed(2)}`;
+    document.getElementById("statOpenJobs").textContent = stats.open_jobs || 0;
+    document.getElementById("statContractors").textContent = stats.contractors_count || 0;
+    document.getElementById("statTotalBids").textContent = stats.total_bids || 0;
+    document.getElementById("statPlatformFees").textContent = `$${(stats.platform_earnings || 0).toFixed(2)}`;
   } catch (err) {
     console.error("Failed to load stats", err);
   }
@@ -146,7 +158,16 @@ async function loadJobs() {
     currentJobs = data.jobs;
 
     if (currentJobs.length === 0) {
-      grid.innerHTML = '<div class="loading-state">No open work orders found. Post one in the Client Portal to begin!</div>';
+      grid.innerHTML = `
+        <div style="grid-column: 1 / -1; background: #0d0d0d; border: 1px dashed var(--border); border-radius: 12px; padding: 3rem 2rem; text-align: center;">
+          <div style="font-size: 2.5rem; margin-bottom: 0.75rem;">📡</div>
+          <h3 style="color: #ffffff; margin-bottom: 0.5rem; font-size: 1.25rem;">No Active Commercial Work Orders Right Now</h3>
+          <p style="color: #a1a1aa; max-width: 520px; margin: 0 auto 1.5rem auto; font-size: 0.9rem;">
+            Be the first to post a commercial structured cabling, 4K CCTV rollout, or network rack installation project to receive competitive bids from certified local technicians.
+          </p>
+          <button class="primary-btn" onclick="switchTab('client-portal-tab')">+ Post a Work Order</button>
+        </div>
+      `;
       renderMapMarkers([]);
       return;
     }
@@ -467,6 +488,20 @@ async function loadMyJobs() {
   const container = document.getElementById("myJobsContainer");
   container.innerHTML = '<div class="loading-state">Loading your work order pipeline...</div>';
 
+  if (!currentUser) {
+    container.innerHTML = `
+      <div style="background: #0d0d0d; padding: 3rem 2rem; border-radius: 12px; border: 1px dashed var(--border); text-align: center;">
+        <div style="font-size: 2.5rem; margin-bottom: 0.75rem;">🔒</div>
+        <h3 style="color: #ffffff; margin-bottom: 0.5rem; font-size: 1.25rem;">Sign In to View Your Dispatch Pipeline</h3>
+        <p style="color: #a1a1aa; max-width: 480px; margin: 0 auto 1.5rem auto; font-size: 0.9rem;">
+          Sign in or create an account to view your proposals, client counter-offers, active on-site check-ins, and escrow payout milestones.
+        </p>
+        <button class="primary-btn" onclick="openAuthModal()">Sign In</button>
+      </div>
+    `;
+    return;
+  }
+
   try {
     const res = await fetch(`/api/my-jobs?user_id=${currentUser.id}&role=${currentUser.role}`);
     const data = await res.json();
@@ -566,6 +601,20 @@ async function loadContractors() {
     const data = await res.json();
     const contractors = data.contractors;
 
+    if (contractors.length === 0) {
+      grid.innerHTML = `
+        <div style="grid-column: 1 / -1; background: #0d0d0d; border: 1px dashed var(--border); border-radius: 12px; padding: 3rem 2rem; text-align: center;">
+          <div style="font-size: 2.5rem; margin-bottom: 0.75rem;">⚡</div>
+          <h3 style="color: #ffffff; margin-bottom: 0.5rem; font-size: 1.25rem;">Technician Network Open for Enrollment</h3>
+          <p style="color: #a1a1aa; max-width: 520px; margin: 0 auto 1.5rem auto; font-size: 0.9rem;">
+            Are you an independent cabling technician, CCTV specialist, or telecom crew in Georgia? Register your business and submit General Liability insurance to get vetted for incoming contract opportunities.
+          </p>
+          <button class="primary-btn" onclick="switchTab('contractor-portal-tab')">+ Join as Certified Contractor</button>
+        </div>
+      `;
+      return;
+    }
+
     grid.innerHTML = contractors.map(c => `
       <div class="contractor-card">
         <div class="contractor-head">
@@ -621,6 +670,38 @@ async function loadContractors() {
 
 // Form Handlers
 function initForms() {
+  // 0. User Sign In Form
+  const loginForm = document.getElementById("loginForm");
+  if (loginForm) {
+    loginForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const username = document.getElementById("loginUsername").value.trim();
+      const password = document.getElementById("loginPassword").value;
+
+      try {
+        const res = await fetch("/api/auth/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ username, password })
+        });
+        const data = await res.json();
+        if (res.ok && data.success) {
+          currentUser = data.user;
+          localStorage.setItem("voltwire_user", JSON.stringify(currentUser));
+          updateUserUI();
+          closeModal("authModal");
+          loginForm.reset();
+          loadDashboardData();
+          alert(`Welcome back, ${currentUser.name}!`);
+        } else {
+          alert(data.error || "Login failed. Check your username and password.");
+        }
+      } catch (err) {
+        alert("Login request failed. Check server connection.");
+      }
+    });
+  }
+
   // 1. Dedicated Client Sign-Up Form
   document.getElementById("clientSignUpForm").addEventListener("submit", async (e) => {
     e.preventDefault();
@@ -653,6 +734,7 @@ function initForms() {
           role: "business",
           email: data.user.email
         };
+        localStorage.setItem("voltwire_user", JSON.stringify(currentUser));
         updateUserUI();
   initDispatchMap();
         document.getElementById("clientSignUpForm").reset();
@@ -708,6 +790,7 @@ function initForms() {
           role: "contractor",
           email: data.user.email
         };
+        localStorage.setItem("voltwire_user", JSON.stringify(currentUser));
         updateUserUI();
   initDispatchMap();
         document.getElementById("contractorSignUpForm").reset();
