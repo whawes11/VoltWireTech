@@ -106,3 +106,4 @@ low_voltage_marketplace/
     └── manifest.json      # Mobile PWA manifest
 ```
 # voltwire
+# voltwire
